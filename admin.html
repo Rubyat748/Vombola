@@ -1,1 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>VOMBOLA // MOBILE ADMIN</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;600;900&display=swap');
 
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#000;
+  color:#0ff;
+  font-family:'Exo 2',sans-serif;
+  overflow-x:hidden;
+  min-height:100vh;
+  touch-action:manipulation;
+}
+canvas{position:fixed;top:0;left:0;z-index:1;pointer-events:none;}
+.overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,10,20,0.98);
+  z-index:2;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  padding:20px;text-align:center;
+}
+.glitch-title{
+  font-family:'Orbitron',sans-serif;font-size:clamp(3rem,12vw,7rem);font-weight:900;color:#0ff;
+  text-shadow:0 0 20px #0ff,0 0 40px #0ff;animation:glitch 2s infinite,pulse 4s infinite;
+}
+@keyframes glitch{
+  0%,100%{text-shadow:4px 4px #f00,-4px -4px #0ff;}
+  25%{text-shadow:-4px -4px #f00,4px 4px #0ff;}
+  50%{text-shadow:4px -4px #ff0,-4px 4px #0f0;}
+}
+@keyframes pulse{0%,100%{opacity:0.8;}50%{opacity:1;}}
+
+.secret-hint{font-size:clamp(1rem,4vw,1.5rem);margin:30px 0;opacity:0.7;animation:blink 3s infinite;}
+@keyframes blink{0%,100%{opacity:0.4;}50%{opacity:0.9;}}
+
+.panel{
+  background:rgba(0,20,40,0.98);padding:20px 15px;border:3px solid #0ff;border-radius:20px;
+  box-shadow:0 0 60px #0ff;max-width:95%;width:100%;margin:15px auto;z-index:10;
+  backdrop-filter:blur(12px);overflow:hidden;
+}
+.panel h2{
+  color:#0ff;text-shadow:0 0 15px #0ff;margin:20px 0 15px;font-size:clamp(1.4rem,5vw,2rem);text-align:center;
+}
+input,textarea,button,select{
+  width:100%;padding:16px;margin:12px 0;background:#001;border:2px solid #0ff;
+  color:#0ff;border-radius:12px;font-size:1.1rem;transition:0.3s;
+}
+input:focus,textarea:focus{box-shadow:0 0 25px #0ff;outline:none;}
+button{
+  background:linear-gradient(45deg,#0ff,#00f);color:#000;font-weight:900;
+  cursor:pointer;box-shadow:0 0 25px #0ff;padding:18px;font-size:1.2rem;border:none;
+}
+button:hover,button:active{transform:scale(0.98);background:linear-gradient(45deg,#0ff,#f0f);}
+.danger{background:#f00 !important;color:#fff !important;}
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin:20px 0;
+  padding:10px;overflow-y:auto;max-height:70vh;
+}
+@media (max-width:768px){
+  .grid{grid-template-columns:1fr;gap:15px;}
+}
+.card{
+  background:#001;border150;border:2px solid #0ff;padding:15px;border-radius:15px;
+  box-shadow:0 0 25px rgba(0,255,255,0.4);transition:0.3s;text-align:center;
+}
+.card img{width:100%;border-radius:10px;margin-bottom:10px;}
+.card button{margin-top:10px;width:100%;}
+.hidden{display:none !important;}
+.top-secret{color:#f00;font-weight:900;text-shadow:0 0 20px #f00;font-size:1.5rem;}
+.float-btn{
+  position:fixed;bottom:20px;right:20px;background:#f00;color:#fff;
+  width:70px;height:70px;border-radius:50%;font-size:2.5rem;z-index:999;
+  box-shadow:0 0 40px #f00;border:none;display:flex;align-items:center;justify-content:center;
+}
+.mobile-tap-hint{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(255,0,0,0.8);
+  color:#fff;padding:15px;border-radius:15px;z-index:998;font-size:1rem;animation:fade 4s forwards;
+}
+@keyframes fade{0%{opacity:1;}80%{opacity:1;}100%{opacity:0;display:none;}}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- SECRET SCREEN -->
+<div id="secretScreen" class="overlay">
+  <h1 class="glitch-title">VOMBOLA</h1>
+  <p style="font-size:clamp(1.5rem,6vw,2.5rem);">SUPREME ADMIN ACCESS</p>
+  <p class="secret-hint">Desktop: CTRL + SHIFT + V<br>Mobile: Tap the red V button <strong>5 times fast</strong></p>
+  <p style="margin-top:40px;color:#0ff;opacity:0.8;">Only the Supreme Leader may enter</p>
+</div>
+
+<!-- HIDDEN LOGIN -->
+<div id="loginPanel" class="panel hidden">
+  <h2 class="top-secret">AUTHENTICATION</h2>
+  <input type="text" id="adminUser" placeholder="SUPREME USERNAME" value="RUBYAT">
+  <input type="password" id="adminPass" placeholder="MASTER KEY" value="89OQBSADETWNA">
+  <button onclick="adminLogin()">UNLOCK SYSTEM</button>
+  <button onclick="hideLogin()" style="background:#666;margin-top:10px;">HIDE</button>
+</div>
+
+<!-- MAIN ADMIN DASHBOARD -->
+<div id="adminDashboard" class="panel hidden">
+  <h1 style="text-align:center;color:#0ff;text-shadow:0 0 30px #0ff;font-size:clamp(2rem,8vw,3rem);">SUPREME CONTROL</h1>
+  <p style="text-align:center;font-size:1.4rem;margin:15px;color:#f00;">Welcome, RUBYAT</p>
+
+  <h2>ADD NEW AGENT</h2>
+  <input type="text" id="aUser" placeholder="Username">
+  <input type="password" id="aPass" placeholder="Password">
+  <input type="text" id="aRank" placeholder="Rank">
+  <input type="url" id="aPic" placeholder="Photo URL (optional)">
+  <input type="text" id="aNick" placeholder="Nickname (optional)">
+  <button onclick="addAgent()">CREATE AGENT</button>
+
+  <h2>ADD FINDING TARGET</h шоу2>
+  <input type="text" id="fName" placeholder="Name">
+  <input type="url" id="fPhoto" placeholder="Photo URL">
+  <textarea id="fReason" rows="3" placeholder="Reason (to protect/help)"></textarea>
+  <button onclick="addFinding()">ADD TARGET</button>
+
+  <h2>BACKUP</h2>
+  <button onclick="exportData()">EXPORT DATA</button>
+  <button onclick="document.getElementById('importFile').click()">IMPORT DATA</button>
+  <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+
+  <h2>AGENTS (<span id="agentCount">0</span>)</h2>
+  <div class="grid" id="agentGrid"></div>
+
+  <h2>FINDING (<span id="findingCount">0</span>)</h2>
+  <div class="grid" id="findingGrid"></div>
+
+  <button onclick="location.href='index.html'" style="background:#0f0;color:#000;margin:30px auto;display:block;width:90%;padding:20px;font-size:1.4rem;">
+    BACK TO NETWORK
+  </button>
+</div>
+
+<button class="float-btn" id="vBtn">V</button>
+
+<script>
+// PARTICLES (mobile optimized - less particles)
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function createParticle(){return{x:Math.random()*canvas.width,y:Math.random()*canvas.height,size:Math.random()*2+1,speedX:Math.random()*1-0.5,speedY:Math.random()*1-0.5,color:'#0ff'};}
+for(let i=0;i<(window.innerWidth<768?50:100);i++) particles.push(createParticle());
+
+function animate(){
+  ctx.fillStyle='rgba(0,0,0,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+    p.x+=p.speedX;p.y+=p.speedY;
+    if(p.x<0||p.x>canvas.width)p.speedX*=-1;
+    if(p.y<0||p.y>canvas.height)p.speedY*=-1;
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+
+// MOBILE: Tap V button 5 times fast to reveal login
+let tapCount=0;
+document.getElementById('vBtn').addEventListener('touchstart',e=>{
+  e.preventDefault();
+  tapCount++;
+  if(tapCount===1) setTimeout(()=>{tapCount=0;},1500);
+  if(tapCount===5){
+    tapCount=0;
+    showLogin();
+    const hint=document.createElement('div');
+    hint.className='mobile-tap-hint';
+    hint.textContent='Access Granted!';
+    document.body.appendChild(hint);
+    setTimeout(()=>hint.remove(),4000);
+  }
+});
+
+// Desktop: CTRL+SHIFT+V
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='v')showLogin();});
+
+function showLogin(){
+  document.getElementById('secretScreen').classList.add('hidden');
+  document.getElementById('loginPanel').classList.remove('hidden');
+}
+function hideLogin(){
+  document.getElementById('loginPanel').classList.add('hidden');
+  document.getElementById('secretScreen').classList.remove('hidden');
+}
+
+function adminLogin(){
+  if(document.getElementById('adminUser').value.toUpperCase()==="RUBYAT" && 
+     document.getElementById('adminPass').value==="89OQBSADETWNA"){
+    document.getElementById('loginPanel').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    loadAllData();
+  }else alert('ACCESS DENIED');
+}
+
+// [All the same powerful functions as before: addAgent, addFinding, delete, export/import, etc.]
+// (Code identical to previous version - just paste the functions from before here)
+
+function loadAllData(){loadAgents();loadFindings();}
+function addAgent(){
+  let users=JSON.parse(localStorage.getItem('vombola_users')||'[]');
+  const nu={username:document.getElementById('aUser').value.trim().toUpperCase(),
+    password:document.getElementById('aPass').value,rank:document.getElementById('aRank').value||"Agent",
+    pic:document.getElementById('aPic').value,nickname:document.getElementById('aNick').value||"",bio:""};
+  if(!nu.username||!nu.password)return alert("Required fields");
+  users.push(nu);localStorage.setItem('vombola_users',JSON.stringify(users));
+  alert("Agent created!");clearForm('a');loadAgents();
+}
+function addFinding(){
+  let d=JSON.parse(localStorage.getItem('vombola_finding')||'[]');
+  d.push({name:document.getElementById('fName').value||"?",
+    photo:document.getElementById('fPhoto').value||'https://via.placeholder.com/300/0ff/000?text=F',
+    reason:document.getElementById('fReason').value||"Protection needed"});
+  localStorage.setItem('vombola_finding',JSON.stringify(d));
+  alert("Added");clearForm('f');loadFindings();
+}
+function clearForm(p){document.querySelectorAll(`#${p}User,#${p}Pass,#${p}Rank,#${p}Pic,#${p}Nick,#${p}Name,#${p}Photo,#${p}Reason`).forEach(x=>x.value='');}
+function loadAgents(){
+  const u=JSON.parse(localStorage.getItem('vombola_users')||'[]');
+  document.getElementById('agentCount').textContent=u.length;
+  const g=document.getElementById('agentGrid');g.innerHTML='';
+  u.forEach((x,i)=>g.innerHTML+=`<div class="card"><img src="${x.pic||'https://via.placeholder.com/300/0ff/000?text='+x.username[0]}"><h3>${x.nickname||x.username}</h3><p>${x.rank}</p><button class="danger" onclick="delAgent(${i})">DELETE</button></div>`);
+}
+function delAgent(i){if(confirm("Delete agent?")){let u=JSON.parse(localStorage.getItem('vombola_users')||'[]');u.splice(i,1);localStorage.setItem('vombola_users',JSON.stringify(u));loadAgents();}}
+function loadFindings(){
+  const d=JSON.parse(localStorage.getItem('vombola_finding')||'[]');
+  document.getElementById('findingCount').textContent=d.length;
+  const g=document.getElementById('findingGrid');g.innerHTML='';
+  d.forEach((x,i)=>g.innerHTML+=`<div class="card"><img src="${x.photo}"><h3>${x.name}</h3><p>${x.reason}</p><button class="danger" onclick="delFind(${i})">DELETE</button></div>`);
+}
+function delFind(i){if(confirm("Remove?")){let d=JSON.parse(localStorage.getItem('vombola_finding')||'[]');d.splice(i,1);localStorage.setItem('vombola_finding',JSON.stringify(d));loadFindings();}}
+function exportData(){
+  const data={users:localStorage.getItem('vombola_users'),finding:localStorage.getItem('vombola_finding')};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
+  a.download='VOMBOLA_BACKUP_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+function importData(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.users)localStorage.setItem('vombola_users',d.users);if(d.finding)localStorage.setItem('vombola_finding',d.finding);alert("Restored!");loadAllData();}catch{alert("Invalid file");}};
+  r.readAsText(f);
+}
+
+// Auto create Supreme Leader
+if(!JSON.parse(localStorage.getItem('vombola_users')||'[]').some(u=>u.username==='RUBYAT')){
+  const u=JSON.parse(localStorage.getItem('vombola_users')||'[]');
+  u.push({username:'RUBYAT',password:'89OQBSADETWNA',rank:'SUPREME LEADER',pic:'',nickname:'RUBYAT',bio:'Founder of VOMBOLA'});
+  localStorage.setItem('vombola_users',JSON.stringify(u));
+}
+</script>
+</body>
+</html>
