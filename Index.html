@@ -1,1 +1,200 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOMBOLA // SECRET HEROES NETWORK</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#000; color:#0f0; font-family:'Roboto Mono',monospace; overflow-y:auto; min-height:100vh; position:relative; }
+body::uccess::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:repeating-linear-gradient(0deg,rgba(0,255,0,0.03),transparent 2px); pointer-events:none; animation:matrix 30s linear infinite; opacity:0.15; }
+@keyframes matrix { from {transform:translateY(0);} to {transform:translateY(-100px);} }
+.container { position:relative; z-index:2; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+.glitch { font-family:'Orbitron',sans-serif; font-size:5rem; color:#0ff; text-shadow:0 0 30px #0ff; animation:glitch 2s infinite; }
+@keyframes glitch { 0%,100%{text-shadow:3px 3px #f00,-3px -3px #0ff;} 25%{text-shadow:-3px -3px #f00,3px 3px #0ff;} }
+.login-box,.panel{background:rgba(0,20,30,0.97);padding:40px;border:2px solid #0ff;border-radius:15px;box-shadow:0 0 60px #0ff;text-align:center;max-width:500px;width:90%;backdrop-filter:blur(10px);}
+input,button,textarea{width:100%;padding:15px;margin:12px 0;background:#111;border:1px solid #0ff;color:#0ff;border-radius:8px;font-size:1.1rem;}
+button{background:#0ff;color:#000;font-weight:bold;cursor:pointer;box-shadow:0 0 20px #0ff;transition:0.3s;}
+button:hover{background:#0cc;transform:scale(1.05);}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;padding:30px;}
+.card{background:#111;border:1px solid #0ff;padding:20px;border-radius:12px;box-shadow:0 0 20px rgba(0,255,255,0.3);transition:0.3s;}
+.card:hover{transform:translateY(-10px);box-shadow:0 0 50px #0ff;}
+.card img{width:100%;border-radius:8px;}
+.hidden{display:none!important;}
+header{padding:20px;text-align:center;border-bottom:2px solid #0ff;background:rgba(0,0,0,0.9);}
+nav button{margin:10px;padding:15px 30px;min-width:180px;font-size:1.1rem;}
+.profile-pic{width:180px;height:180px;border-radius:50%;object-fit:cover;border:6px solid #0ff;box-shadow:0 0 50px #0ff;margin:20px 0;}
+h1,h2,h3{color:#0ff;text-shadow:0 0 15px #0ff;}
+.logout{background:#f00;float:right;}
+.content{padding:20px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="container">
+  <div class="login-box">
+    <h1 class="glitch">VOMBOLA</h1>
+    <p style="font-size:1.3rem;margin:20px 0;">Secret Heroes Network</p>
+    <input type="text" id="username" placeholder="USERNAME" autocomplete="off">
+    <input type="password" id="password" placeholder="PASSWORD">
+    <button onclick="attemptLogin()">ENTER NETWORK</button>
+  </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="mainScreen" class="hidden">
+  <header>
+    <h1>VOMBOLA <span style="color:#0ff;">// ONLINE</span></h1>
+    <button class="logout" onclick="logout()">LOG OUT</button>
+  </header>
+
+  <nav style="text-align:center;padding:20px;background:rgba(0,0,0,0.8);">
+    <button onclick="showSection('goodworks')">GOOD WORKS</button>
+    <button onclick="showSection('missions')">MISSIONS</button>
+    <button onclick="showSection('members')">MEMBERS</button>
+    <button onclick="showSection('finding')">FINDING</button>
+    <button onclick="showSection('profileSection')">PROFILE</button>
+    <button onclick="location.href='admin.html'" style="background:#f00;color:#fff;">ADMIN</button>
+  </nav>
+
+  <!-- PROFILE -->
+  <section id="profileSection" class="content hidden">
+    <h2>MY PROFILE</h2>
+    <center>
+      <img id="profilePic" class="profile-pic" src="https://via.placeholder.com/180/0ff/000?text=AGENT">
+      <h1 id="profileNickname">AGENT</h1>
+      <p id="profileBio" style="max-width:600px;margin:20px auto;font-size:1.2rem;">No bio yet</p>
+      <button onclick="showEdit()">EDIT PROFILE</button>
+    </center>
+  </section>
+
+  <section id="editProfileSection" class="content hidden">
+    <h2>EDIT PROFILE</h2>
+    <div class="panel">
+      <input type="text" id="editNickname" placeholder="Nickname">
+      <textarea id="editBio" placeholder="Bio (max 200 chars)" maxlength="200" rows="5"></textarea>
+      <input type="url" id="editPic" placeholder="Profile picture URL">
+      <button onclick="saveProfile()">SAVE</button>
+      <button onclick="showSection('profileSection')">CANCEL</button>
+    </div>
+  </section>
+
+  <!-- AUTO 900 GOOD WORKS -->
+  <section id="goodworks" class="content hidden">
+    <h2>GOOD WORKS COMPLETED (900+)</h2>
+    <div class="grid" id="goodworksGrid"></div>
+  </section>
+
+  <!-- MEMBERS -->
+  <section id="members" class="content hidden">
+    <h2>OUR HEROES</h2>
+    <div class="grid" id="membersGrid"></div>
+  </section>
+
+  <!-- AUTO 900 FINDING -->
+  <section id="finding" class="content hidden">
+    <h2>PEOPLE WE ARE FINDING TO HELP (900+)</h2>
+    <div class="grid" id="findingGrid"></div>
+  </section>
+
+  <section id="missions" class="content hidden"><h2>MISSIONS</h2><p>Classified...</p></section>
+</div>
+
+<script>
+const users = JSON.parse(localStorage.getItem('vombola_users') || '[]');
+let currentUser = null;
+
+// LOGIN
+function attemptLogin() {
+  const u = document.getElementById('username').value.trim().toUpperCase();
+  const p = document.getElementById('password').value;
+  const user = users.find(x => x.username === u && x.password === p);
+  if (user) {
+    currentUser = user;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('mainScreen').classList.remove('hidden');
+    loadAll();
+  } else alert('ACCESS DENIED');
+}
+
+// AUTO LOAD 900 GOOD WORKS
+function loadGoodWorks() {
+  const grid = document.getElementById('goodworksGrid');
+  grid.innerHTML = '';
+  for(let i=1; i<=900; i++) {
+    const img = `assets/goodwork/${i}.png`;
+    grid.innerHTML += `<div class="card"><img src="${img}" onerror="this.src='https://via.placeholder.com/300/0ff/000?text=GOOD+WORK+${i}'"><p>Good Work #${i}</p></div>`;
+  }
+}
+
+// AUTO LOAD 900 FINDING
+function loadFinding() {
+  const grid = document.getElementById('findingGrid');
+  grid.innerHTML = '';
+  for(let i=1; i<=900; i++) {
+    const img = `assets/finding/${i}.png`;
+    grid.innerHTML += `<div class="card"><img src="${img}" onerror="this.src='https://via.placeholder.com/300/0ff/000?text=FINDING+${i}'"><p>Finding Case #${i}</p></div>`;
+  }
+}
+
+function loadMembers() {
+  const grid = document.getElementById('membersGrid');
+  grid.innerHTML = '';
+  users.forEach(u => {
+    grid.innerHTML += `<div class="card"><img src="${u.pic||'https://via.placeholder.com/300/0ff/000?text='+u.username[0]}"><h3>${u.nickname||u.username}</h3><p>${u.rank||'Agent'}</p></div>`;
+  });
+}
+
+function loadProfile() {
+  document.getElementById('profileNickname').textContent = currentUser.nickname || currentUser.username;
+  document.getElementById('profileBio').textContent = currentUser.bio || 'No bio yet';
+  document.getElementById('profilePic').src = currentUser.pic || 'https://via.placeholder.com/180/0ff/000?text=' + (currentUser.nickname || currentUser.username)[0];
+  document.getElementById('editNickname').value = currentUser.nickname || '';
+  document.getElementById('editBio').value = currentUser.bio || '';
+  document.getElementById('editPic').value = currentUser.pic || '';
+}
+
+function showEdit() { document.getElementById('profileSection').classList.add('hidden'); document.getElementById('editProfileSection').classList.remove('hidden'); }
+function saveProfile() {
+  currentUser.nickname = document.getElementById('editNickname').value.trim() || currentUser.username;
+  currentUser.bio = document.getElementById('editBio').value.trim();
+  currentUser.pic = document.getElementById('editPic').value.trim() || currentUser.pic;
+  const idx = users.findIndex(x => x.username === currentUser.username);
+  users[idx] = currentUser;
+  localStorage.setItem('vombola_users', JSON.stringify(users));
+  alert('Profile Saved!');
+  loadProfile();
+  showSection('profileSection');
+}
+
+function showSection(s) {
+  document.querySelectorAll('.content').forEach(x => x.classList.add('hidden'));
+  document.getElementById(s).classList.remove('hidden');
+}
+
+function loadAll() {
+  loadProfile();
+  loadMembers();
+  loadGoodWorks();
+  loadFinding();
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('mainScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+}
+
+// Auto-create admin if not exists
+if (!users.some(u => u.username === 'RUBYAT')) {
+  users.push({username:'RUBYAT', password:'89OQBSADETWNA', rank:'SUPREME LEADER', pic:'', nickname:'RUBYAT', bio:'Founder of VOMBOLA'});
+  localStorage.setItem('vombola_users', JSON.stringify(users));
+}
+</script>
+</body>
+</html>
